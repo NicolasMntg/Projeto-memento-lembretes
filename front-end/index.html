@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-tema="claro">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Memento | Meus Lembretes</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+
+    <body>
+        <!-- CABEÇALHO -->
+        <header class="topbar">
+            <div class="topbar-inner">
+                <div class="brand">
+                    <span class="brand-mark" aria-hidden="true">M</span>
+                    <div>
+                        <h1>Memento</h1>
+                        <p>Seus lembretes, sempre em ordem</p>
+                    </div>
+                </div>
+
+                <div class="topbar-actions">
+                    <button id="btnTema" class="btn btn-icon" type="button" title="Alternar tema claro/escuro" aria-label="Alternar tema">
+                        <span class="icon-sol" aria-hidden="true">&#9728;</span>
+                        <span class="icon-lua" aria-hidden="true">&#9790;</span>
+                    </button>
+                    <button id="btnImprimir" class="btn btn-ghost" type="button"> Gerar PDF </button>
+                    <button id="btnNovo" class="btn btn-primary" type="button"> + Novo lembrete </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="layout">
+            <!-- FILTRO -->
+            <aside class="painel painel-filtro">
+                <form id="formFiltro" novalidate>
+                    <div class="painel-titulo">
+                        <h2>Filtros</h2>
+                        <span id="contadorFiltros" class="badge hidden">0</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="filtroDescricao"> Descrição </label>
+                        <input type="search" id="filtroDescricao" placeholder="Pesquisar por texto..." maxlength="500">
+                    </div>
+
+                    <fieldset class="grupo-datas">
+                        <legend>Data de cadastro</legend>
+
+                        <div class="linha-datas">
+                            <div class="form-group">
+                                <label for="filtroDataCadastroInicial"> De </label>
+                                <input type="date" id="filtroDataCadastroInicial">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="filtroDataCadastroFinal"> Até </label>
+                                <input type="date" id="filtroDataCadastroFinal">
+                            </div>
+                        </div>
+
+                        <small id="erroDataCadastro" class="erro-campo hidden"></small>
+                    </fieldset>
+
+                    <fieldset class="grupo-datas">
+                        <legend>Data de atualização</legend>
+
+                        <div class="linha-datas">
+                            <div class="form-group">
+                                <label for="filtroDataAtualizacaoInicial"> De </label>
+                                <input type="date" id="filtroDataAtualizacaoInicial">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="filtroDataAtualizacaoFinal"> Até </label>
+                                <input type="date" id="filtroDataAtualizacaoFinal">
+                            </div>
+                        </div>
+
+                        <small id="erroDataAtualizacao" class="erro-campo hidden"></small>
+                    </fieldset>
+
+                    <div class="painel-acoes">
+                        <button type="button" id="btnLimpar" class="btn btn-ghost"> Limpar </button>
+                        <button type="submit" id="btnFiltrar" class="btn btn-primary"> Aplicar filtros </button>
+                    </div>
+                </form>
+            </aside>
+
+            <!-- LISTAGEM -->
+            <section class="painel painel-lista">
+                <div class="table-header">
+                    <div>
+                        <h2>Lembretes</h2>
+                        <span id="totalRegistros" class="texto-suave"> 0 registros </span>
+                    </div>
+
+                    <div class="form-group form-inline">
+                        <label for="tamanhoPagina"> Por página </label>
+
+                        <select id="tamanhoPagina">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="ordenavel" data-ordem="Descricao" aria-sort="none" tabindex="0">
+                                    Descrição <span class="seta" aria-hidden="true"></span>
+                                </th>
+                                <th class="ordenavel" data-ordem="DataCadastro" aria-sort="descending" tabindex="0">
+                                    Cadastro <span class="seta" aria-hidden="true"></span>
+                                </th>
+                                <th class="ordenavel" data-ordem="DataAtualizacao" aria-sort="none" tabindex="0">
+                                    Atualização <span class="seta" aria-hidden="true"></span>
+                                </th>
+                                <th>Status</th>
+                                <th class="col-acoes">Ações</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="listaLembretes">
+                        </tbody>
+                    </table>
+
+                    <!-- ESTADOS DA LISTAGEM -->
+                    <div id="estadoCarregando" class="estado hidden">
+                        <span class="spinner" aria-hidden="true"></span>
+                        <p>Carregando lembretes...</p>
+                    </div>
+
+                    <div id="mensagemVazia" class="estado hidden">
+                        <span class="estado-icone" aria-hidden="true">&#128269;</span>
+                        <p class="estado-titulo">Nenhum lembrete encontrado</p>
+                        <p class="texto-suave">Ajuste os filtros ou cadastre um novo lembrete.</p>
+                    </div>
+
+                    <div id="mensagemErro" class="estado estado-erro hidden">
+                        <span class="estado-icone" aria-hidden="true">&#9888;</span>
+                        <p class="estado-titulo">Não foi possível carregar os lembretes</p>
+                        <p id="mensagemErroDetalhe" class="texto-suave"></p>
+                        <button id="btnTentarNovamente" type="button" class="btn btn-ghost"> Tentar novamente </button>
+                    </div>
+                </div>
+
+                <!-- PAGINAÇÃO -->
+                <nav class="pagination" aria-label="Paginação">
+                    <span id="paginaAtual" class="texto-suave"> Página 1 de 1 </span>
+
+                    <div class="pagination-botoes">
+                        <button id="btnAnterior" class="btn btn-page" type="button" aria-label="Página anterior"> &#8249; </button>
+                        <div id="numerosPagina" class="pagination-numeros"></div>
+                        <button id="btnProximo" class="btn btn-page" type="button" aria-label="Próxima página"> &#8250; </button>
+                    </div>
+                </nav>
+            </section>
+        </main>
+
+        <!-- FORMULÁRIO -->
+        <dialog id="formulario" class="modal">
+            <form id="formLembrete" novalidate>
+                <div class="modal-cabecalho">
+                    <h2 id="tituloFormulario">Novo lembrete</h2>
+                    <button type="button" id="btnFechar" class="btn btn-icon" aria-label="Fechar"> &times; </button>
+                </div>
+
+                <input type="hidden" id="lembreteId">
+
+                <div class="form-group">
+                    <label for="descricao"> Descrição <span class="obrigatorio">*</span></label>
+                    <textarea id="descricao" rows="4" placeholder="O que você precisa lembrar?" maxlength="500" required></textarea>
+
+                    <div class="campo-rodape">
+                        <small id="erroDescricao" class="erro-campo hidden"></small>
+                        <small id="contadorCaracteres" class="texto-suave">0/500</small>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="btnCancelar" class="btn btn-ghost"> Cancelar </button>
+                    <button type="submit" id="btnSalvar" class="btn btn-primary"> Salvar </button>
+                </div>
+            </form>
+        </dialog>
+
+        <!-- CONFIRMAÇÃO DE EXCLUSÃO -->
+        <dialog id="modalConfirmacao" class="modal modal-pequeno">
+            <div class="modal-cabecalho">
+                <h2>Excluir lembrete?</h2>
+            </div>
+
+            <p class="texto-suave">O lembrete <strong id="confirmacaoDescricao"></strong> será removido da lista.</p>
+
+            <div class="form-actions">
+                <button type="button" id="btnConfirmacaoCancelar" class="btn btn-ghost"> Cancelar </button>
+                <button type="button" id="btnConfirmacaoExcluir" class="btn btn-danger"> Excluir </button>
+            </div>
+        </dialog>
+
+        <!-- TOAST -->
+        <div id="toasts" class="toasts" aria-live="polite"></div>
+        <script src="js/app.js"></script>
+    </body>
+</html>
