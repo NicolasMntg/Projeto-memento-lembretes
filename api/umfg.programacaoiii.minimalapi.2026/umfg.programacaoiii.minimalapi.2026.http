@@ -1,0 +1,36 @@
+@HostAddress = https://localhost:7063
+@id = 00000000-0000-0000-0000-000000000000
+
+### Consultar todos os lembretes ativos
+GET {{HostAddress}}/lembretes
+Accept: application/json
+
+### Buscar lembrete por id
+GET {{HostAddress}}/lembretes/{{id}}
+Accept: application/json
+
+### Consultar com filtros, paginação e ordenação
+GET {{HostAddress}}/lembretes/filtro?NumeroPagina=1&TamanhoPagina=10&Ordem=Descricao&Direcao=ASC&Descricao=&DataCadastroInicial=2026-01-01&DataCadastroFinal=2026-12-31
+Accept: application/json
+
+### Cadastrar lembrete
+POST {{HostAddress}}/lembretes
+Content-Type: application/json
+
+{
+  "descricao": "Entregar trabalho de Programação III"
+}
+
+### Atualizar lembrete
+PUT {{HostAddress}}/lembretes/{{id}}
+Content-Type: application/json
+
+{
+  "descricao": "Entregar trabalho de Programação III (revisado)"
+}
+
+### Excluir lembrete (exclusão lógica)
+DELETE {{HostAddress}}/lembretes/{{id}}
+
+### Gerar relatório PDF
+GET {{HostAddress}}/lembretes/imprimir?NumeroPagina=1&TamanhoPagina=10
